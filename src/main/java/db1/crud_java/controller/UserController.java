@@ -1,6 +1,7 @@
 package db1.crud_java.controller;
 
 import db1.crud_java.usuario.*;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -38,23 +39,33 @@ public class UserController {
 
     @PatchMapping("/{id}")
     @Transactional
-    public void atualizar(@PathVariable Long id, @RequestBody @Valid DadosAtualizacaoUsuario dados) {
-        var usuario = repository.getReferenceById(id);
-        System.out.println(usuario);
+    public ResponseEntity<DadosAtualizacaoUsuario> atualizar(@PathVariable Long id, @RequestBody DadosAtualizacaoUsuario dados) {
+        var usuario = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
         usuario.atualizarInformacoes(dados);
-//        return ResponseEntity.status(HttpStatus.OK).body(usuario);
+        repository.save(usuario);
+        var resposta = new DadosAtualizacaoUsuario(usuario.getName(), usuario.getEmail());
+
+        return ResponseEntity.ok(resposta);
+    }
+
+    @DeleteMapping("/{id}")
+    @Transactional
+    public void desativar(@PathVariable Long id) {
+       var usuario = repository.findById(id).orElseThrow();
+       usuario.desativar();
     }
 
 //    @DeleteMapping("/{id}")
 //    @Transactional
 //    public void excluir(@PathVariable Long id) {
-//        repository.deleteById(id);
+//        Usuario usuario = new Usuario();
+//        usuario = repository.findById(usuario.getId());
+////        if(usuario.)
 //    }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping
     @Transactional
-    public void desativar(@PathVariable Long id) {
-        var usuario = repository.getReferenceById(id);
-        usuario.desativar();
+    public void excluirUsuarios() {
+        repository.deleteAll();
     }
 }
