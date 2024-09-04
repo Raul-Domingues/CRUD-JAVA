@@ -40,7 +40,7 @@ public class UserController {
     @PatchMapping("/{id}")
     @Transactional
     public ResponseEntity<DadosAtualizacaoUsuario> atualizar(@PathVariable Long id, @RequestBody DadosAtualizacaoUsuario dados) {
-        var usuario = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
+        var usuario = repository.findById(id).orElseThrow();
         usuario.atualizarInformacoes(dados);
         repository.save(usuario);
         var resposta = new DadosAtualizacaoUsuario(usuario.getName(), usuario.getEmail());
@@ -48,19 +48,27 @@ public class UserController {
         return ResponseEntity.ok(resposta);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/desativar/{id}")
     @Transactional
-    public void desativar(@PathVariable Long id) {
+    public ResponseEntity<Void> desativar(@PathVariable Long id) {
        var usuario = repository.findById(id).orElseThrow();
        usuario.desativarUsuario();
-       ResponseEntity.noContent();
+       return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/ativar/{id}")
     @Transactional
-    public void ativarUsuario(@PathVariable Long id) {
+    public ResponseEntity<String> ativarUsuario(@PathVariable Long id) {
         var usuario = repository.findById(id).orElseThrow();
         usuario.ativarUsuario();
+        //  STATUS code pode ser feito ResponseEntity.status(HttpStatus.OK).body( ...
+        return ResponseEntity.ok().body("Usuário ativado com sucesso!");
+    }
+
+    @DeleteMapping("/{id}")
+    @Transactional
+    public void excluirUsuario(@PathVariable Long id) {
+        repository.deleteById(id);
     }
 
     @DeleteMapping
