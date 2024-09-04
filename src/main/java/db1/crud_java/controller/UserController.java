@@ -34,7 +34,7 @@ public class UserController {
 
     @GetMapping
     public List<DadosListagemUsuario> listar() {
-        return repository.findAll().stream().map(DadosListagemUsuario::new).toList();
+        return repository.findAllByDeletedFalse().stream().map(DadosListagemUsuario::new).toList();
     }
 
     @PatchMapping("/{id}")
@@ -52,16 +52,16 @@ public class UserController {
     @Transactional
     public void desativar(@PathVariable Long id) {
        var usuario = repository.findById(id).orElseThrow();
-       usuario.desativar();
+       usuario.desativarUsuario();
+       ResponseEntity.noContent();
     }
 
-//    @DeleteMapping("/{id}")
-//    @Transactional
-//    public void excluir(@PathVariable Long id) {
-//        Usuario usuario = new Usuario();
-//        usuario = repository.findById(usuario.getId());
-////        if(usuario.)
-//    }
+    @PatchMapping("/ativar/{id}")
+    @Transactional
+    public void ativarUsuario(@PathVariable Long id) {
+        var usuario = repository.findById(id).orElseThrow();
+        usuario.ativarUsuario();
+    }
 
     @DeleteMapping
     @Transactional

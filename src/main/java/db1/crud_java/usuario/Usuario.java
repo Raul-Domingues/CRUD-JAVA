@@ -44,8 +44,12 @@ public class Usuario {
         }
     }
 
-    public void desativar() {
+    public void desativarUsuario() {
         this.deleted = true;
+    }
+
+    public void ativarUsuario() {
+        this.deleted = false;
     }
 
     @Override
