@@ -6,9 +6,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -22,15 +25,17 @@ public class Usuario {
     private String name;
     private String email;
     private Boolean deleted;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+
+    @CreationTimestamp
+    private Date createdAt;
+
+    @UpdateTimestamp
+    private Date updatedAt;
 
     public Usuario(@Valid DadosCadastroUsuario dados) {
         this.name = dados.name();
         this.email = dados.email();
         this.deleted = false;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
     }
 
     public void atualizarInformacoes(@Valid DadosAtualizacaoUsuario dados) {
@@ -58,5 +63,4 @@ public class Usuario {
                 ", email='" + email + '\'' +
                 '}';
     }
-
 }
