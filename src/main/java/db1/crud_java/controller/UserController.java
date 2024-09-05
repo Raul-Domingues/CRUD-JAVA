@@ -1,7 +1,6 @@
 package db1.crud_java.controller;
 
 import db1.crud_java.usuario.*;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +23,11 @@ public class UserController {
     @Transactional
     public ResponseEntity<Map<String, Object>> cadastrar(@RequestBody @Valid DadosCadastroUsuario dados) {
         Usuario usuario = new Usuario(dados);
+        if (repository.existsByEmail(dados.getEmail())) {
+            Map<String, Object> erro = new HashMap<>();
+            erro.put("mensagem", "Email não disponível");
+            return ResponseEntity.badRequest().body(erro);
+        }
         repository.save(usuario);
 
         Map<String, Object> resposta = new HashMap<>();
@@ -67,8 +71,9 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     @Transactional
-    public void excluirUsuario(@PathVariable Long id) {
+    public ResponseEntity<String> excluirUsuario(@PathVariable Long id) {
         repository.deleteById(id);
+        return ResponseEntity.ok().body("Usuário deletado com sucesso!");
     }
 
     @DeleteMapping

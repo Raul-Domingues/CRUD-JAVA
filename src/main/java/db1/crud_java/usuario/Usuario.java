@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-//@SQLDelete(sql = "UPDATE Users SET status = 'true' WHERE id = ?")
 @Table(name = "users")
 @Entity(name = "Usuario")
 public class Usuario {
@@ -60,11 +59,4 @@ public class Usuario {
                 '}';
     }
 
-//    public void setName(String name) {
-//        this.name = name;
-//    }
-//
-//    public void setEmail(String email) {
-//        this.email = email;
-//    }
 }

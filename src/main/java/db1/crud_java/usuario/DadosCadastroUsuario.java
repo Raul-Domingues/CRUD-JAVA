@@ -11,4 +11,9 @@ public record DadosCadastroUsuario(
         @NotBlank
         @Email
         String email
-) { }
+) {
+        public String getEmail() {
+                return email;
+        }
+
+}
