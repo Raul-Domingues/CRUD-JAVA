@@ -1,17 +1,16 @@
 package db1.crud_java.controller;
 
-import db1.crud_java.usuario.*;
+import db1.crud_java.dto.DadosAtualizacaoUsuario;
+import db1.crud_java.dto.DadosCadastroUsuario;
+import db1.crud_java.dto.DadosListagemUsuario;
+import db1.crud_java.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,77 +18,67 @@ import java.util.Map;
 @RequestMapping("/v1/users")
 public class UserController {
 
-    @Autowired
-    private UsuarioRepository repository;
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @Operation(summary = "Cria um novo usuário")
-    @ApiResponse(responseCode = "201", description = "Usuário criado com sucesso")
-    @Transactional
+    @ApiResponse(responseCode = "201")
     @PostMapping
     public ResponseEntity<Map<String, Object>> cadastrar(@RequestBody @Valid DadosCadastroUsuario dados) {
-        Usuario usuario = new Usuario(dados);
-        if (repository.existsByEmail(dados.getEmail())) {
-            Map<String, Object> erro = new HashMap<>();
-            erro.put("mensagem", "Email não disponível");
-            return ResponseEntity.badRequest().body(erro);
+        Map<String, Object> resposta = userService.cadastrarUsuario(dados);
+        if (resposta.containsKey("mensagem")) {
+            return ResponseEntity.badRequest().body(resposta);
         }
-        repository.save(usuario);
-
-        Map<String, Object> resposta = new HashMap<>();
-        resposta.put("ID do usuário criado", usuario.getId());
-
         return ResponseEntity.status(HttpStatus.CREATED).body(resposta);
     }
 
     @Operation(summary = "Listar usuários")
+    @ApiResponse(responseCode = "200")
     @GetMapping
     public List<DadosListagemUsuario> listar() {
-        return repository.findAllByDeletedFalse().stream().map(DadosListagemUsuario::new).toList();
+        return userService.listarUsuarios();
     }
 
     @Operation(summary = "Editar usuário")
-    @Transactional
+    @ApiResponse(responseCode = "200")
     @PatchMapping("/{id}")
-    public ResponseEntity<DadosAtualizacaoUsuario> atualizar(@PathVariable Long id, @RequestBody DadosAtualizacaoUsuario dados) {
-        var usuario = repository.findById(id).orElseThrow();
-        usuario.atualizarInformacoes(dados);
-        repository.save(usuario);
-        var resposta = new DadosAtualizacaoUsuario(usuario.getName(), usuario.getEmail());
-
+    public ResponseEntity<DadosAtualizacaoUsuario> atualizar(@PathVariable Long id, @RequestBody @Valid DadosAtualizacaoUsuario dados) {
+        DadosAtualizacaoUsuario resposta = userService.atualizarUsuario(id, dados);
         return ResponseEntity.ok(resposta);
     }
 
+    @ApiResponse(responseCode = "204")
     @Operation(summary = "Desativar usuário")
-    @Transactional
     @DeleteMapping("/desativar/{id}")
     public ResponseEntity<Void> desativar(@PathVariable Long id) {
-       var usuario = repository.findById(id).orElseThrow();
-       usuario.desativarUsuario();
-       return ResponseEntity.noContent().build();
+        userService.desativarUsuario(id);
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Ativar usuário")
-    @Transactional
+    @ApiResponse(responseCode = "200")
     @PatchMapping("/ativar/{id}")
     public ResponseEntity<String> ativarUsuario(@PathVariable Long id) {
-        var usuario = repository.findById(id).orElseThrow();
-        usuario.ativarUsuario();
-        //  STATUS code pode ser feito ResponseEntity.status(HttpStatus.OK).body( ...
-        return ResponseEntity.ok().body("Usuário ativado com sucesso!");
+        String resposta = userService.ativarUsuario(id);
+        return ResponseEntity.ok(resposta);
     }
 
     @Operation(summary = "Deletar usuário")
-    @Transactional
+    @ApiResponse(responseCode = "200")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> excluirUsuario(@PathVariable Long id) {
-        repository.deleteById(id);
-        return ResponseEntity.ok().body("Usuário deletado com sucesso!");
+        userService.excluirUsuario(id);
+        return ResponseEntity.ok("Usuário deletado com sucesso!");
     }
 
     @Operation(summary = "Deletar todos os usuários")
-    @Transactional
+    @ApiResponse(responseCode = "204")
     @DeleteMapping
-    public void excluirUsuarios() {
-        repository.deleteAll();
+    public ResponseEntity<Void> excluirUsuarios() {
+        userService.excluirTodosUsuarios();
+        return ResponseEntity.noContent().build();
     }
 }

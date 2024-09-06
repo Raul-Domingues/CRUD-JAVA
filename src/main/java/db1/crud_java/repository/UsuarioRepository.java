@@ -1,5 +1,6 @@
-package db1.crud_java.usuario;
+package db1.crud_java.repository;
 
+import db1.crud_java.entity.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

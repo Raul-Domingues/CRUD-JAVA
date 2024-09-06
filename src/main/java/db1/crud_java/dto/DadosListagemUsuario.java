@@ -1,4 +1,6 @@
-package db1.crud_java.usuario;
+package db1.crud_java.dto;
+
+import db1.crud_java.entity.Usuario;
 
 public record DadosListagemUsuario(Long id, String name, String email) {
 
