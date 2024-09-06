@@ -1,6 +1,9 @@
 package db1.crud_java.controller;
 
 import db1.crud_java.usuario.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,8 +22,10 @@ public class UserController {
     @Autowired
     private UsuarioRepository repository;
 
-    @PostMapping
+    @Operation(summary = "Cria um novo usuário")
+    @ApiResponse(responseCode = "201", description = "Usuário criado com sucesso")
     @Transactional
+    @PostMapping
     public ResponseEntity<Map<String, Object>> cadastrar(@RequestBody @Valid DadosCadastroUsuario dados) {
         Usuario usuario = new Usuario(dados);
         if (repository.existsByEmail(dados.getEmail())) {
@@ -36,13 +41,15 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(resposta);
     }
 
+    @Operation(summary = "Listar usuários")
     @GetMapping
     public List<DadosListagemUsuario> listar() {
         return repository.findAllByDeletedFalse().stream().map(DadosListagemUsuario::new).toList();
     }
 
-    @PatchMapping("/{id}")
+    @Operation(summary = "Editar usuário")
     @Transactional
+    @PatchMapping("/{id}")
     public ResponseEntity<DadosAtualizacaoUsuario> atualizar(@PathVariable Long id, @RequestBody DadosAtualizacaoUsuario dados) {
         var usuario = repository.findById(id).orElseThrow();
         usuario.atualizarInformacoes(dados);
@@ -52,16 +59,18 @@ public class UserController {
         return ResponseEntity.ok(resposta);
     }
 
-    @DeleteMapping("/desativar/{id}")
+    @Operation(summary = "Desativar usuário")
     @Transactional
+    @DeleteMapping("/desativar/{id}")
     public ResponseEntity<Void> desativar(@PathVariable Long id) {
        var usuario = repository.findById(id).orElseThrow();
        usuario.desativarUsuario();
        return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/ativar/{id}")
+    @Operation(summary = "Ativar usuário")
     @Transactional
+    @PatchMapping("/ativar/{id}")
     public ResponseEntity<String> ativarUsuario(@PathVariable Long id) {
         var usuario = repository.findById(id).orElseThrow();
         usuario.ativarUsuario();
@@ -69,15 +78,17 @@ public class UserController {
         return ResponseEntity.ok().body("Usuário ativado com sucesso!");
     }
 
-    @DeleteMapping("/{id}")
+    @Operation(summary = "Deletar usuário")
     @Transactional
+    @DeleteMapping("/{id}")
     public ResponseEntity<String> excluirUsuario(@PathVariable Long id) {
         repository.deleteById(id);
         return ResponseEntity.ok().body("Usuário deletado com sucesso!");
     }
 
-    @DeleteMapping
+    @Operation(summary = "Deletar todos os usuários")
     @Transactional
+    @DeleteMapping
     public void excluirUsuarios() {
         repository.deleteAll();
     }
